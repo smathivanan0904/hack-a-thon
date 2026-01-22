@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Faculty Dashboard</title>
+<style>
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f4f4f9;
+    margin: 0;
+    padding: 0;
+}
+header {
+    background: #ff8f5c;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+header button {
+    background: white;
+    color: #ff8f5c;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+header button:hover { background: #f1f1f1; }
+
+.container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.section {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.section h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+input, select, button {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+button {
+    background: #ff8f5c;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+button:hover { background: #e6773f; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+table th, table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+table th {
+    background: #ff8f5c;
+    color: white;
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Faculty Dashboard</h1>
+    <button onclick="logout()">Logout</button>
+</header>
+
+<div class="container">
+
+    <!-- Section: Add Academic Record -->
+    <div class="section">
+        <h2>Add Academic Record</h2>
+        <form id="recordForm" onsubmit="return addRecord()">
+            <input type="text" id="studentUsername" placeholder="Student Username" required>
+            <input type="number" id="semester" placeholder="Semester" min="1" required>
+            <input type="text" id="subject" placeholder="Subject" required>
+            <input type="number" id="marks" placeholder="Marks" min="0" max="100" required>
+            <input type="number" id="attendance" placeholder="Attendance %" min="0" max="100" required>
+            <button type="submit">Add Record</button>
+        </form>
+        <p id="recordMsg" style="color: green;"></p>
+    </div>
+
+    <!-- Section: View Student Records -->
+    <div class="section">
+        <h2>All Student Records</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Semester</th>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Attendance</th>
+                </tr>
+            </thead>
+            <tbody id="recordsTable">
+                <!-- Data will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+// Fetch and populate student records
+function loadRecords() {
+    fetch("http://127.0.0.1:5000/faculty/data", { credentials: 'include' })
+    .then(res => res.json())
+    .then(data => {
+        const tbody = document.getElementById("recordsTable");
+        tbody.innerHTML = "";
+        data.forEach(r => {
+            const row = `<tr>
+                <td>${r.username}</td>
+                <td>${r.semester}</td>
+                <td>${r.subject}</td>
+                <td>${r.marks}</td>
+                <td>${r.attendance}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    });
+}
+
+// Add academic record
+function addRecord() {
+    const username = document.getElementById("studentUsername").value;
+    const semester = document.getElementById("semester").value;
+    const subject = document.getElementById("subject").value;
+    const marks = document.getElementById("marks").value;
+    const attendance = document.getElementById("attendance").value;
+
+    fetch("http://127.0.0.1:5000/faculty/update", {
+        method: "POST",
+        credentials: 'include',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, semester, subject, marks, attendance })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("recordMsg").innerText = data.message;
+        loadRecords();
+        document.getElementById("recordForm").reset();
+    });
+
+    return false; // Prevent form submission
+}
+
+// Logout
+function logout() {
+    fetch("http://127.0.0.1:5000/logout", { credentials: 'include' })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        window.location.href = "faculty_login.html";
+    });
+}
+
+// Initial load
+loadRecords();
+</script>
+
+</body>
+</html>

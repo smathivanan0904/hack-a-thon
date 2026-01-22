@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard</title>
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background: #f5f5f5;
+}
+header {
+    background: #6a11cb;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+header h1 { margin: 0; }
+.container {
+    padding: 20px;
+    max-width: 900px;
+    margin: auto;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+table th, table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+table th {
+    background-color: #6a11cb;
+    color: white;
+}
+button {
+    background: #6a11cb;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+button:hover { background: #2575fc; }
+.no-data {
+    text-align: center;
+    margin-top: 30px;
+    color: #555;
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Welcome to Student Dashboard</h1>
+</header>
+
+<div class="container">
+    <button onclick="logout()">Logout</button>
+    <div id="data-container">
+        <p class="no-data">Loading your academic records...</p>
+    </div>
+</div>
+
+<script>
+// Fetch student data from backend
+function loadData() {
+    fetch("http://127.0.0.1:5000/student/data", {
+        credentials: 'include'
+    })
+    .then(res => res.json())
+    .then(data => {
+        const container = document.getElementById('data-container');
+        if(data.length === 0){
+            container.innerHTML = '<p class="no-data">No academic records found.</p>';
+            return;
+        }
+
+        let html = `<table>
+            <thead>
+                <tr>
+                    <th>Semester</th>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Attendance (%)</th>
+                </tr>
+            </thead>
+            <tbody>`;
+        data.forEach(r => {
+            html += `<tr>
+                <td>${r.semester}</td>
+                <td>${r.subject}</td>
+                <td>${r.marks}</td>
+                <td>${r.attendance}</td>
+            </tr>`;
+        });
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+    })
+    .catch(err => {
+        document.getElementById('data-container').innerHTML = '<p class="no-data">Error loading data. Please login again.</p>';
+        console.error(err);
+    });
+}
+
+// Logout function
+function logout() {
+    fetch("http://127.0.0.1:5000/logout", {
+        credentials: 'include'
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        window.location.href = "student_login.html";
+    });
+}
+
+// Load data on page load
+window.onload = loadData;
+</script>
+
+</body>
+</html>

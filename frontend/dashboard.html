@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Dashboard</h2>
+<button onclick="logout()">Logout</button>
+
+<script>
+function logout(){
+fetch("http://127.0.0.1:5000/logout",{credentials:"include"})
+.then(()=>location.href="login.html")
+}
+</script>
+</body>
+</html>

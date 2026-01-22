@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Faculty Login</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:Segoe UI, sans-serif; }
+body { height:100vh; display:flex; background:#121212; color:white; }
+
+/* LEFT LOGIN PANEL */
+.left {
+    width:40%;
+    padding:60px;
+    background:#111;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+h1 { margin-bottom:10px; }
+p { color:#aaa; margin-bottom:30px; }
+input {
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border:none;
+    background:#1e1e1e;
+    color:white;
+    border-radius:6px;
+}
+input:focus { outline:2px solid #ff8f5c; }
+a { color:#ff8f5c; text-decoration:none; font-size:14px; }
+button {
+    margin-top:20px;
+    padding:12px;
+    background:#ff8f5c;
+    border:none;
+    color:white;
+    font-size:16px;
+    border-radius:8px;
+    cursor:pointer;
+}
+button:hover { background:#e6773f; }
+.bottom { margin-top:25px; font-size:14px; }
+
+/* RIGHT DESIGN PANEL */
+.right {
+    width:60%;
+    background:#ff8f5c;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+.right h1 { font-size:40px; }
+.right p { font-size:18px; margin-top:10px; color:#eee; }
+</style>
+</head>
+<body>
+
+<div class="left">
+    <h1>Faculty Login</h1>
+    <p>Authorized access only</p>
+
+    <input id="username" placeholder="Faculty Username">
+    <input id="password" type="password" placeholder="Password">
+
+    <a href="forgot.html">Forgot Password?</a>
+
+    <button onclick="login()">Login</button>
+
+    <div class="bottom">
+        New faculty? <a href="register.html">Register</a><br><br>
+        <a href="index.html">← Back to Home</a>
+    </div>
+</div>
+
+<div class="right">
+    <div>
+        <h1>Faculty Portal</h1>
+        <p>Manage student academic records securely</p>
+    </div>
+</div>
+
+<script>
+function login() {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    if(!username || !password){
+        alert("Please enter username and password!");
+        return;
+    }
+
+    fetch("http://127.0.0.1:5000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.role === "faculty"){
+            alert("Login Successful!");
+            window.location.href = "faculty_dashboard.html";
+        } else {
+            alert(data.message || "Invalid Faculty Credentials");
+        }
+    })
+    .catch(err => alert("Error connecting to server: " + err));
+}
+</script>
+
+</body>
+</html>

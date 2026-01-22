@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forgot Password / Username</title>
+<style>
+body {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+    background:linear-gradient(135deg,#6a11cb,#2575fc);
+    font-family: 'Segoe UI', sans-serif;
+}
+.card {
+    background:white;
+    padding:40px;
+    border-radius:20px;
+    width:350px;
+    text-align:center;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+.card h2 {
+    margin-bottom:20px;
+    color:#333;
+}
+.card input, .card select {
+    width:90%;
+    padding:12px;
+    margin:10px 0;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:16px;
+}
+.card button {
+    width:95%;
+    padding:12px;
+    margin-top:15px;
+    border:none;
+    border-radius:10px;
+    background:#6a11cb;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+.card button:hover {
+    background:#2575fc;
+}
+#captcha-box {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+#captcha-code {
+    font-weight:bold;
+    font-size:18px;
+    background:#eee;
+    padding:5px 10px;
+    border-radius:5px;
+    letter-spacing:2px;
+}
+.go-back {
+    position:absolute;
+    top:20px;
+    left:20px;
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+    background:#444;
+    padding:8px 12px;
+    border-radius:8px;
+}
+</style>
+</head>
+<body>
+
+<a href="index.html" class="go-back">← Go Back</a>
+
+<div class="card">
+    <h2>Reset Account</h2>
+    <select id="type">
+        <option value="password">Change Password</option>
+        <option value="username">Change Username</option>
+    </select>
+    <input id="username" placeholder="Current Username">
+    <input id="email" placeholder="Email">
+
+    <input id="newvalue" placeholder="New Password/Username">
+    <input id="confirmvalue" placeholder="Confirm Password/Username">
+
+    <div id="captcha-box">
+        <span id="captcha-code">Loading...</span>
+        <button type="button" onclick="generateCaptcha()" style="width:80px;background:#2575fc;">Refresh</button>
+    </div>
+    <input id="captcha" placeholder="Enter Captcha">
+
+    <button onclick="resetAccount()">Submit</button>
+    <p id="msg" style="color:red;margin-top:10px;"></p>
+</div>
+
+<script>
+let currentCaptcha = '';
+
+function generateCaptcha(){
+    fetch("http://127.0.0.1:5000/captcha")
+    .then(res=>res.json())
+    .then(data=>{
+        currentCaptcha = data.captcha;
+        document.getElementById("captcha-code").innerText = currentCaptcha;
+    });
+}
+
+// Generate captcha on page load
+generateCaptcha();
+
+function resetAccount(){
+    const type = document.getElementById("type").value;
+    const username = document.getElementById("username").value;
+    const email = document.getElementById("email").value;
+    const newvalue = document.getElementById("newvalue").value;
+    const confirmvalue = document.getElementById("confirmvalue").value;
+    const captcha = document.getElementById("captcha").value;
+
+    fetch("http://127.0.0.1:5000/forgot",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            type, username, email, newvalue, confirmvalue, captcha, captcha_real: currentCaptcha
+        })
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        document.getElementById("msg").innerText = data.message;
+        if(data.message.includes("Successfully")){
+            setTimeout(()=>{window.location.href="index.html"},1000);
+        } else {
+            generateCaptcha(); // refresh captcha on error
+        }
+    });
+}
+</script>
+
+</body>
+</html>
